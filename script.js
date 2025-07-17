@@ -42,18 +42,37 @@ function generateRandomGraph() {
        .append("title")
        .text(d => d.label);
 
-    svg.selectAll(".node-label")
-       .data(nodes)
-       .enter()
-       .append("text")
-       .attr("class", "node-label")
-       .attr("x", d => d.x)
-       .attr("y", d => d.y)
-       .attr("dy", -25)
-       .attr("text-anchor", "middle")
-       .attr("font-size", "14px")
-       .attr("fill", "#333")
-       .text(d => d.label);
+       // Draw nodes
+svg.selectAll(".node")
+   .data(nodes)
+   .enter()
+   .append("circle")
+   .attr("class", "node")
+   .attr("r", 20)
+   .attr("cx", d => d.x)
+   .attr("cy", d => d.y)
+   .append("title")
+   .text(d => d.label);
+
+// Add node labels
+// Add node labels with transitions
+svg.selectAll(".node-label")
+   .data(nodes)
+   .enter()
+   .append("text")
+   .attr("class", "node-label")
+   .attr("x", d => d.x)
+   .attr("y", d => d.y + 5) // Adjust position for label
+   .attr("text-anchor", "middle")
+   .attr("font-size", "14px")
+   .attr("fill", "#333")
+   .text(d => d.label)
+   .attr("opacity", 0) // Start with opacity 0
+   .transition() // Start the transition
+   .duration(1000) // Set duration for the transition
+   .attr("opacity", 1); // End with opacity 1
+
+
 
     // Parse edges input
     const edgesInput = document.getElementById("edges-input").value.trim();
@@ -70,8 +89,8 @@ function generateRandomGraph() {
         const [nodePair, weight] = edgeStr.trim().split(" ");
         const [nodeA, nodeB] = nodePair.split("-");
 
-        const sourceNode = nodes.find(node => node.label === nodeA);
-        const targetNode = nodes.find(node => node.label === nodeB);
+        const sourceNode = nodes.find(node => node.label === nodeA.trim());
+        const targetNode = nodes.find(node => node.label === nodeB.trim());
 
         if (sourceNode && targetNode) {
             edges.push({
@@ -120,25 +139,27 @@ function findShortestPath() {
     const endNode = nodes.find(node => node.label === endNodeLabel);
 
     if (!startNode || !endNode) {
-        return; // Do not alert; simply return
+        console.log("Invalid start or end node.");
+        return; // Just log, no alert
     }
 
     const distances = {};
     const previousNodes = {};
     const queue = new PriorityQueue((a, b) => a.distance - b.distance);
 
+    // Initialize distances and queue
     nodes.forEach(node => {
-        distances[node.label] = Infinity;
-        previousNodes[node.label] = null;
+        distances[node.label] = Infinity; // Set initial distances to Infinity
+        previousNodes[node.label] = null; // Set previous nodes to null
     });
-    distances[startNode.label] = 0;
+    distances[startNode.label] = 0; // Distance to start node is 0
     queue.enqueue({ node: startNode, distance: 0 });
 
     while (!queue.isEmpty()) {
         const { node: currentNode } = queue.dequeue();
 
         if (currentNode === endNode) {
-            break; // Reached the destination node
+            break; // Exit if we've reached the end node
         }
 
         edges.forEach(edge => {
@@ -147,14 +168,15 @@ function findShortestPath() {
                 const newDistance = distances[currentNode.label] + edge.weight;
 
                 if (newDistance < distances[neighbor.label]) {
-                    distances[neighbor.label] = newDistance;
-                    previousNodes[neighbor.label] = currentNode;
+                    distances[neighbor.label] = newDistance; // Update distance
+                    previousNodes[neighbor.label] = currentNode; // Track previous node
                     queue.enqueue({ node: neighbor, distance: newDistance });
                 }
             }
         });
     }
 
+    // Backtrack to find the shortest path
     shortestPath = [];
     let currentNode = endNode;
     while (currentNode) {
@@ -168,7 +190,8 @@ function findShortestPath() {
 // Function to highlight the shortest path
 function highlightShortestPath() {
     if (shortestPath.length === 0) {
-        return;
+        console.log("No path found.");
+        return; // Log if no path found
     }
 
     // Highlight edges in the shortest path
