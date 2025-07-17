@@ -1,0 +1,137 @@
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f4; /* Lighter background */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#main-container {
+  background-color: #ffffff;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  width: 90%;
+  max-width: 1200px; /* Increased max width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+header {
+  background-color: #2980b9; /* Updated header color */
+  color: white;
+  padding: 15px;
+  width: 100%;
+  text-align: center;
+  border-radius: 10px 10px 0 0;
+  z-index: 10;
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px; /* Increased heading size */
+  font-weight: bold;
+}
+
+#input-section {
+  padding: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.input-group label {
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #333; /* Darker label text color */
+}
+
+.input-group input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 200px; /* Adjusted input width */
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+button {
+  background-color: #2980b9; /* Updated button color */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 10px;
+  transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+button:hover {
+  background-color: #21618C; /* Slightly darker hover color */
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+#graph-svg {
+  width: 100%;
+  height: 600px; /* Increased graph height */
+  background-color: #ecf0f1; /* Updated graph background color */
+  border-top: 2px solid #2980b9; /* Updated graph border color */
+  margin-top: 20px;
+  border-radius: 0 0 10px 10px;
+}
+
+/* Node styles */
+.node {
+  fill: #2980b9; /* Updated node color */
+  stroke: #ffffff;
+  stroke-width: 2px;
+  r: 10;
+}
+
+.node:hover {
+  fill: #21618C; /* Slightly darker hover color */
+  r: 12;
+}
+
+/* Edge styles */
+.edge {
+  stroke: #95a5a6;
+  stroke-width: 2px;
+}
+
+.node-label {
+  font-size: 14px; /* Ensured label text is visible */
+  fill: #333;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.link-label {
+  font-size: 12px;
+  fill: #333;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
