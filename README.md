@@ -1,4 +1,4 @@
-# IIT_Ropar_Project
+# Smart Interactive Path Finding Visualizer
 
 This project is an interactive web-based tool to visualize and understand various pathfinding and graph traversal algorithms. It was developed as part of the internship project at IIT Ropar.
 
