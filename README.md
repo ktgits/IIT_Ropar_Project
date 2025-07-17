@@ -11,8 +11,6 @@ Depth First Search (DFS)
 
 Dijkstra’s Algorithm
 
-A* Search Algorithm
-
 Best First Search
 
 Prim’s Algorithm (Minimum Spanning Tree)
