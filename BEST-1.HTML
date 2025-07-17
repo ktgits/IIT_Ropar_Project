@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Best First Search Pathfinding</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #eee;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            grid-template-rows: repeat(10, 40px);
+            gap: 1px;
+            background-color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            transition: background-color 0.5s ease; /* Smooth transition for cell color */
+        }
+
+        .start,
+        .end {
+            background-color: lightseagreen;
+        }
+
+        .blocked {
+            background-color: black;
+        }
+
+        .path {
+            background-color: lightseagreen;
+        }
+
+        .visited {
+            background-color: lightseagreen;
+        }
+
+        button {
+            font-size: 24px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #3e8e41;
+        }
+
+        .message {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        .reset {
+            font-size: 24px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .reset:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Best First Search Pathfinding</h1>
+
+        <div class="grid" id="grid"></div>
+
+        <button class="find" onclick="findPath()" disabled>Find Path</button>
+        <button class="reset" onclick="resetGrid()">Reset</button>
+
+        <div class="message">Select starting node</div>
+    </div>
+
+    <script>
+    const ROW = 10;
+const COL = 10;
+let grid = [];
+let startNode = null;
+let endNode = null;
+let isFindingPath = false;
+
+function createGrid() {
+  const gridContainer = document.getElementById("grid");
+  grid = new Array(ROW).fill(0).map(() => new Array(COL).fill(0));
+
+  for (let i = 0; i < ROW; i++) {
+    for (let j = 0; j < COL; j++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.dataset.row = i;
+      cell.dataset.col = j;
+      cell.addEventListener("click", () => selectStartEnd(cell));
+      gridContainer.appendChild(cell);
+    }
+  }
+}
+
+function selectStartEnd(cell) {
+  if (!startNode) {
+    startNode = cell;
+    startNode.classList.add("start");
+    document.querySelector(".message").textContent = "Select ending node";
+  } else if (!endNode && cell !== startNode) {
+    endNode = cell;
+    endNode.classList.add("end");
+    document.querySelector(".message").textContent = "Now, toggle blocked cells or click 'Find Path'";
+    document.querySelectorAll(".cell").forEach((c) =>
+      c.addEventListener("click", toggleBlock)
+    );
+    document.querySelector(".find").disabled = false;
+  }
+}
+
+function toggleBlock() {
+  const row = parseInt(this.dataset.row);
+  const col = parseInt(this.dataset.col);
+
+  if (this !== startNode && this !== endNode) {
+    this.classList.toggle("blocked");
+    grid[row][col] = this.classList.contains("blocked") ? 1 : 0;
+  }
+}
+
+function findBestFirstPath() {
+  if (isFindingPath) return;
+  isFindingPath = true;
+
+  const message = document.querySelector(".message");
+  message.textContent = "";
+
+  const visited = Array.from({ length: ROW }, () => Array(COL).fill(false));
+
+  const pathCells = document.querySelectorAll(".visited, .path");
+  pathCells.forEach((cell) => cell.classList.remove("visited", "path"));
+
+  const path = bestFirstSearch(startNode, visited);
+
+  if (path) {
+    // Highlight only the final path, not visited nodes
+    highlightPath(path);
+    message.textContent = "Path found!";
+  } else {
+    message.textContent = "No path found!";
+  }
+
+  isFindingPath = false;
+}
+
+function bestFirstSearch(start, visited) {
+  const priorityQueue = [];
+  priorityQueue.push({ node: start, parent: null, distance: 0 });
+
+  const directions = [
+    [1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1],
+  ];
+
+  const nodeParents = new Map();
+
+  while (priorityQueue.length > 0) {
+    priorityQueue.sort((a, b) => a.distance - b.distance);
+    const { node, parent } = priorityQueue.shift();
+    const row = parseInt(node.dataset.row);
+    const col = parseInt(node.dataset.col);
+
+    if (visited[row][col]) continue;
+    visited[row][col] = true;
+
+    nodeParents.set(node, parent);
+
+    if (node === endNode) {
+      return reconstructPath(nodeParents, node);
+    }
+
+    for (const [dx, dy] of directions) {
+      const newRow = row + dx;
+      const newCol = col + dy;
+
+      if (newRow >= 0 && newRow < ROW && newCol >= 0 && newCol < COL && grid[newRow][newCol] !== 1 && !visited[newRow][newCol]) {
+        const neighbor = document.querySelector(`[data-row="${newRow}"][data-col="${newCol}"]`);
+        const distance = Math.abs(newRow - parseInt(endNode.dataset.row)) + Math.abs(newCol - parseInt(endNode.dataset.col));
+        priorityQueue.push({ node: neighbor, parent: node, distance });
+      }
+    }
+  }
+
+  return null;
+}
+
+// Reconstruct the final path by backtracking from the endNode to the startNode
+function reconstructPath(nodeParents, currentNode) {
+  const path = [];
+  while (currentNode) {
+    path.push(currentNode);
+    currentNode = nodeParents.get(currentNode);
+  }
+  return path.reverse();
+}
+
+function highlightPath(path) {
+  path.forEach((cell, index) => {
+    setTimeout(() => {
+      if (index === path.length - 1) {
+        cell.classList.add("path");
+      } else {
+        cell.classList.add("visited");
+      }
+    }, index * 200); // Slow transition (200ms delay)
+  });
+}
+
+function resetGrid() {
+  grid = new Array(ROW).fill(0).map(() => new Array(COL).fill(0));
+
+  const allCells = document.querySelectorAll(".cell");
+  allCells.forEach((cell) => {
+    cell.classList.remove("start", "end", "blocked", "visited", "path");
+  });
+
+  startNode = null;
+  endNode = null;
+
+  document.querySelector(".find").disabled = true;
+
+  allCells.forEach((cell) => {
+    cell.removeEventListener("click", toggleBlock);
+    cell.addEventListener("click", () => selectStartEnd(cell));
+  });
+
+  document.querySelector(".message").textContent = "Select starting node";
+}
+
+window.onload = () => {
+  createGrid();
+  document.querySelector(".find").addEventListener("click", findBestFirstPath);
+  document.querySelector(".reset").addEventListener("click", resetGrid);
+};
+
+
+    </script>
+</body>
+</html>
